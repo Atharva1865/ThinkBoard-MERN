@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
+import path from "path"
 
 import notesRoutes from "./routes/notesRoutes.js"
 import { connectDB } from "./config/db.js"
@@ -12,7 +13,7 @@ dotenv.config() // Now we can access the env variables
 
 const app = express()
 const PORT = process.env.PORT || 5001
-
+const __dirname = path.resolve()
 
 // Middleware -> Remember that the Order of the Middleware is Important
 app.use(express.json())  // This Middeware will parse json bodies: req.body
@@ -23,12 +24,22 @@ app.use(express.json())  // This Middeware will parse json bodies: req.body
 //     next()  // calls the method, for which the Request is hitted
 // })
 
-app.use(cors({
-    origin: "http://localhost:5173",
-}))  // To solve the CORS error
+if (process.env.NODE_ENV !== "production") {
+    app.use(cors({
+        origin: "http://localhost:5173",
+    }))  // To solve the CORS error
+}
 // The RateLimiter's Middleware must be after the CORS's Middleware 
 app.use(RateLimiter)
 app.use("/api/notes", notesRoutes)
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")))
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"))
+    })
+}
 
 connectDB().then(() => {  // First connect to database and then start to listen  (This is a small Optimization)
     app.listen(PORT, () => {

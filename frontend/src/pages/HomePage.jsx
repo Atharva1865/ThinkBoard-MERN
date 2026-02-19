@@ -5,6 +5,7 @@ import api from "../lib/axios"
 import toast from "react-hot-toast"
 import NoteCard from "../components/NoteCard"
 import NotesNotFound from "../components/NotesNotFound"
+import { LoaderIcon } from "lucide-react"
 
 const HomePage = () => {
   const [isRateLimited, setIsRateLimited] = useState(false)
@@ -47,7 +48,9 @@ const HomePage = () => {
       {isRateLimited && <RateLimitedUI />}
 
       <div className="max-w-7xl mx-auto mt-6 p-4">
-        {loading && <div className="text-center text-primary py-10">Loading notes...</div>}
+        {loading && <div className="min-h-[50vh] flex items-center justify-center">
+          <LoaderIcon className="animate-spin size-10" />
+        </div>}
 
         {notes.length === 0 && !loading && !isRateLimited && <NotesNotFound />}
 
